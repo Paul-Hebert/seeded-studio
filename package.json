@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "netlify function:serve"
+    "build": "npx @11ty/eleventy",
+    "start": "run-p start:*",
+    "start:functions": "netlify function:serve",
+    "start:site": "FUNCTIONS_HOST=http://localhost:9999 npx @11ty/eleventy --serve"
   },
   "repository": {
     "type": "git",
@@ -15,8 +18,12 @@
   },
   "homepage": "https://github.com/Paul-Hebert/seeded-studio",
   "dependencies": {
+    "randomness-helpers": "^0.0.1"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^2.0.1",
     "@netlify/functions": "^1.6.0",
     "netlify-cli": "^15.6.0",
-    "randomness-helpers": "^0.0.1"
+    "npm-run-all": "^4.1.5"
   }
 }

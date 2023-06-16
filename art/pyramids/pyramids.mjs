@@ -1,10 +1,6 @@
-import { builder, Handler } from "@netlify/functions";
-import { getSeed } from "../helpers/get-seed";
-import { setSeed, randomHsl, randomInt } from "randomness-helpers";
+import { randomHsl, randomInt } from "randomness-helpers";
 
-const myHandler: Handler = async (event) => {
-  setSeed(getSeed(event));
-
+export default function () {
   let markup = "";
 
   const squareSize = randomInt(8, 10);
@@ -47,17 +43,5 @@ const myHandler: Handler = async (event) => {
     }
   }
 
-  return {
-    statusCode: 200,
-    headers: {
-      "Content-Type": "image/svg+xml",
-    },
-    body: `
-      <svg viewBox="0 0 100 100" width="300" height="300" xmlns="http://www.w3.org/2000/svg">
-        ${markup}
-      </svg>
-    `,
-  };
-};
-
-export const handler = builder(myHandler);
+  return markup;
+}
