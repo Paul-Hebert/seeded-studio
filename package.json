@@ -1,0 +1,22 @@
+{
+  "name": "seeded-studio",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "netlify function:serve"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Paul-Hebert/seeded-studio.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Paul-Hebert/seeded-studio/issues"
+  },
+  "homepage": "https://github.com/Paul-Hebert/seeded-studio",
+  "dependencies": {
+    "@netlify/functions": "^1.6.0",
+    "netlify-cli": "^15.6.0",
+    "randomness-helpers": "^0.0.1"
+  }
+}
