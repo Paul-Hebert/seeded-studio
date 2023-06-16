@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "build": "npx @11ty/eleventy",
     "start": "run-p start:*",
     "start:functions": "netlify function:serve",
-    "start:site": "FUNCTIONS_HOST=http://localhost:9999 npx @11ty/eleventy --serve"
+    "start:site": "FUNCTIONS_HOST=http://localhost:9999 npx @11ty/eleventy --serve",
+    "scaffold": "node scaffold.js"
   },
   "repository": {
     "type": "git",
@@ -18,6 +20,7 @@
   },
   "homepage": "https://github.com/Paul-Hebert/seeded-studio",
   "dependencies": {
+    "prompts": "^2.4.2",
     "randomness-helpers": "^0.0.1"
   },
   "devDependencies": {
