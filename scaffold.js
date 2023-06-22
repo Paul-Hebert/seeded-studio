@@ -35,8 +35,10 @@ description: ${description}
   );
   writeFileSync(
     `./art/${slug}/${slug}.mjs`,
-    `export default function () {
-  return "<circle cx='50' cy='50' r='25'/>";
+    `import { buildSvg } from "../../helpers/build-svg.mjs";
+
+export function draw () {
+  return buildSvg({content: "<circle cx='50' cy='50' r='25'/>"});
 }`
   );
 }

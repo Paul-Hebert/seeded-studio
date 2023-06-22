@@ -1,9 +1,10 @@
 import { randomHsl, randomInt } from "randomness-helpers";
+import { buildSvg } from "../../helpers/build-svg.mjs";
 
-export default function () {
+export function draw() {
   let markup = "";
 
-  const squareSize = randomInt(8, 10);
+  const squareSize = randomInt(8, 15);
   const columnCount = 100 / squareSize;
 
   const color = randomHsl({ s: 30, l: 30 });
@@ -43,5 +44,5 @@ export default function () {
     }
   }
 
-  return markup;
+  return buildSvg({ content: markup });
 }

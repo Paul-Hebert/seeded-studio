@@ -1,0 +1,12 @@
+<ul>
+  {%- for post in collections.art -%}
+    <li>
+      <a href="{{post.url}}">
+        {{ post.data.title }}
+
+        {# TODO: Alt #}
+        <img src="{{data.functions_host}}/.netlify/functions/draw/{{ post.data.name }}/0" />
+      </a>
+      </li>
+  {%- endfor -%}
+</ul>

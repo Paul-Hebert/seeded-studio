@@ -1,7 +1,7 @@
 import { builder, Handler } from "@netlify/functions";
 import { setSeed } from "randomness-helpers";
 
-const myHandler: Handler = async (event) => {
+const myHandler = async (event) => {
   const pathChunks = event.path
     .replace("/.netlify/functions/draw/", "")
     .split("/");
@@ -18,11 +18,7 @@ const myHandler: Handler = async (event) => {
     headers: {
       "Content-Type": "image/svg+xml",
     },
-    body: `
-      <svg viewBox="0 0 100 100" width="300" height="300" xmlns="http://www.w3.org/2000/svg">
-        ${artFunction.default()}
-      </svg>
-    `,
+    body: artFunction.draw(),
   };
 };
 
