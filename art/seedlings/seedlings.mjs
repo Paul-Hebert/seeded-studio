@@ -7,6 +7,7 @@ import {
 } from "randomness-helpers";
 import { spline } from "../../helpers/spline.mjs";
 import { angledPositionFromPoint } from "../../helpers/angled-position-from-point.mjs";
+import { angleBetweenPoints } from "../../helpers/angle-between-points.mjs";
 
 export function draw(seed) {
   setSeed(seed);
@@ -35,46 +36,42 @@ export function draw(seed) {
     }
 
     lines.push(
-      `<path fill="none" stroke="#000" d="${spline(
-        points
-      )}" stroke-width="10"/>`
+      `<path 
+        fill="none"
+        stroke="#000"
+        d="${spline(points)}" 
+        stroke-width="10"
+        stroke-linecap="round"
+      />`
     );
 
     const fruitSize = randomInt(20, 50);
 
-    for (let a = 0; a < randomInt(20, 40); a++) {
-      const angle = randomDegree();
-      const distance = randomInt(0, fruitSize - 4);
+    const outerCircleAngle = angleBetweenPoints(points.at(-1), points.at(-2));
 
-      const circlePoint = angledPositionFromPoint({
-        angle,
-        distance,
-        point: { x, y },
-      });
-    }
+    const outerCirclePos = angledPositionFromPoint({
+      angle: outerCircleAngle,
+      point: { x, y },
+      distance: fruitSize / 3,
+    });
 
     fruits.push(
-      `<circle cx="${x}" cy="${y}" r="${fruitSize}" fill="#fff" stroke-width="2" />`
+      `<circle cx="${outerCirclePos.x}" cy="${outerCirclePos.y}" r="${fruitSize}" fill="#fff" stroke-width="2" />`
     );
 
-    let fruitDetail = `<circle cx="${x}" cy="${y}" r="${fruitSize}" fill="#fff" />`;
-
-    const innerCirclePos = {
-      x: x + randomInt((fruitSize / 4) * -1, fruitSize / 4),
-      y: y + randomInt(fruitSize / 4, fruitSize / 2),
-    };
+    let fruitDetail = `<circle cx="${outerCirclePos.x}" cy="${outerCirclePos.y}" r="${fruitSize}" fill="#fff" />`;
 
     const innerCircleSize = randomInt(fruitSize / 5, fruitSize / 3);
 
-    for (let angle = 0; angle < 360; angle += Math.min(15, fruitSize / 3)) {
+    for (let angle = 0; angle < 360; angle += Math.max(12, fruitSize / 5)) {
       const innerCirclePoint = angledPositionFromPoint({
         angle,
-        point: innerCirclePos,
+        point: { x, y },
         distance: innerCircleSize,
       });
       const outerCirclePoint = angledPositionFromPoint({
         angle,
-        point: { x, y },
+        point: outerCirclePos,
         distance: fruitSize,
       });
       fruitDetail += `
@@ -90,8 +87,8 @@ export function draw(seed) {
       `;
     }
 
-    fruitDetail += `<circle cx="${innerCirclePos.x}" cy="${innerCirclePos.y}" r="${innerCircleSize}" stroke="#000" fill="none" stroke-width="2" />`;
-    fruitDetail += `<circle cx="${x}" cy="${y}" r="${fruitSize}" stroke="#000" fill="none" stroke-width="2" />`;
+    fruitDetail += `<circle cx="${x}" cy="${y}" r="${innerCircleSize}" stroke="#000" fill="none" stroke-width="2" />`;
+    fruitDetail += `<circle cx="${outerCirclePos.x}" cy="${outerCirclePos.y}" r="${fruitSize}" stroke="#000" fill="none" stroke-width="2" />`;
 
     fruitDetails.push(fruitDetail);
   }
@@ -119,11 +116,11 @@ export function draw(seed) {
           stroke="#000"
           stroke-width="10"
         />
-        ${lines.join("")}
       </g>
       <g class="2 circles">
         ${fruits.join("")}
         ${fruitDetails.join("")}
+        ${lines.join("")}
       </g>
     `,
     viewBoxWidth,
