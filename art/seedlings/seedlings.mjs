@@ -17,6 +17,7 @@ export function draw(seed) {
   const frameWidth = 10;
   const lines = [];
   const fruits = [];
+  const fruitDetails = [];
 
   const lineCount = randomInt(5, 10);
 
@@ -53,8 +54,46 @@ export function draw(seed) {
     }
 
     fruits.push(
-      `<circle cx="${x}" cy="${y}" r="${fruitSize}" stroke="#000" fill="#fff" stroke-width="2" />`
+      `<circle cx="${x}" cy="${y}" r="${fruitSize}" fill="#fff" stroke-width="2" />`
     );
+
+    let fruitDetail = `<circle cx="${x}" cy="${y}" r="${fruitSize}" fill="#fff" />`;
+
+    const innerCirclePos = {
+      x: x + randomInt((fruitSize / 4) * -1, fruitSize / 4),
+      y: y + randomInt(fruitSize / 4, fruitSize / 2),
+    };
+
+    const innerCircleSize = randomInt(fruitSize / 5, fruitSize / 3);
+
+    for (let angle = 0; angle < 360; angle += Math.min(15, fruitSize / 3)) {
+      const innerCirclePoint = angledPositionFromPoint({
+        angle,
+        point: innerCirclePos,
+        distance: innerCircleSize,
+      });
+      const outerCirclePoint = angledPositionFromPoint({
+        angle,
+        point: { x, y },
+        distance: fruitSize,
+      });
+      fruitDetail += `
+        <line
+          x1="${innerCirclePoint.x}" 
+          y1="${innerCirclePoint.y}"
+          x2="${outerCirclePoint.x}" 
+          y2="${outerCirclePoint.y}"
+          fill="none"
+          stroke="#000"
+
+        />
+      `;
+    }
+
+    fruitDetail += `<circle cx="${innerCirclePos.x}" cy="${innerCirclePos.y}" r="${innerCircleSize}" stroke="#000" fill="none" stroke-width="2" />`;
+    fruitDetail += `<circle cx="${x}" cy="${y}" r="${fruitSize}" stroke="#000" fill="none" stroke-width="2" />`;
+
+    fruitDetails.push(fruitDetail);
   }
 
   return buildSvg({
@@ -84,14 +123,10 @@ export function draw(seed) {
       </g>
       <g class="2 circles">
         ${fruits.join("")}
+        ${fruitDetails.join("")}
       </g>
     `,
     viewBoxWidth,
     viewBoxHeight,
   });
-}
-
-function drawLine(startX) {
-  let y = 0;
-  let x = startX;
 }
