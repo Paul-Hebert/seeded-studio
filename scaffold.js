@@ -36,9 +36,12 @@ description: ${description}
   writeFileSync(
     `./art/${slug}/${slug}.mjs`,
     `import { buildSvg } from "../../helpers/build-svg.mjs";
+import { setSeed, randomHsl } from 'randomness-helpers';
 
-export function draw () {
-  return buildSvg({content: "<circle cx='50' cy='50' r='25'/>"});
+export function draw (seed) {
+  setSeed(seed);
+  
+  return buildSvg({content: \`<circle cx='50' cy='50' r='25' fill="\${randomHsl({l: 50})}"/>\`});
 }`
   );
 }

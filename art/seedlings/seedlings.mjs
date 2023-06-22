@@ -3,11 +3,14 @@ import {
   randomInt,
   randomChanceOfNegative,
   randomDegree,
+  setSeed,
 } from "randomness-helpers";
 import { spline } from "../../helpers/spline.mjs";
 import { angledPositionFromPoint } from "../../helpers/angled-position-from-point.mjs";
 
-export function draw() {
+export function draw(seed) {
+  setSeed(seed);
+
   const viewBoxWidth = 1100;
   const viewBoxHeight = 850;
   const frameSize = 100;

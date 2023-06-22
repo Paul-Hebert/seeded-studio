@@ -1,7 +1,9 @@
-import { randomHsl, randomInt } from "randomness-helpers";
+import { randomHsl, randomInt, setSeed } from "randomness-helpers";
 import { buildSvg } from "../../helpers/build-svg.mjs";
 
-export function draw() {
+export function draw(seed) {
+  setSeed(seed);
+
   let markup = "";
 
   const squareSize = randomInt(8, 15);

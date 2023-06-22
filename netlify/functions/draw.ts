@@ -1,5 +1,4 @@
 import { builder, Handler } from "@netlify/functions";
-import { setSeed } from "randomness-helpers";
 
 const myHandler = async (event) => {
   const pathChunks = event.path
@@ -9,8 +8,6 @@ const myHandler = async (event) => {
   const artName = pathChunks[0];
   const seed = pathChunks[pathChunks.length - 1];
 
-  setSeed(seed);
-
   const artFunction = await import(`../../art/${artName}/${artName}.mjs`);
 
   return {
@@ -18,7 +15,7 @@ const myHandler = async (event) => {
     headers: {
       "Content-Type": "image/svg+xml",
     },
-    body: artFunction.draw(),
+    body: artFunction.draw(seed),
   };
 };
 
