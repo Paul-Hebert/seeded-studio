@@ -1,4 +1,4 @@
-import { buildSvg } from "../../helpers/build-svg.mjs";
+import { buildSvg } from "../../helpers/build-svg.js";
 import {
   randomInt,
   randomChanceOfNegative,
@@ -6,9 +6,9 @@ import {
   setSeed,
 } from "randomness-helpers";
 import { spline } from "@georgedoescode/spline";
-import { angledPositionFromPoint } from "../../helpers/angled-position-from-point.mjs";
-import { angleBetweenPoints } from "../../helpers/angle-between-points.mjs";
-import { buildFunctionEndpoint } from "../helpers/build-function-endpoint.mjs";
+import { angledPositionFromPoint } from "../../helpers/angled-position-from-point.js";
+import { angleBetweenPoints } from "../../helpers/angle-between-points.js";
+import { buildFunctionEndpoint } from "../../helpers/build-function-endpoint.js";
 
 export const handler = buildFunctionEndpoint((seed) => {
   setSeed(seed);
@@ -57,17 +57,6 @@ export const handler = buildFunctionEndpoint((seed) => {
     const fruitSize = randomInt(20, 50);
 
     const outerCircleAngle = angleBetweenPoints(points.at(-2), points.at(-1));
-
-    console.log(
-      points.at(-2),
-      points.at(-1),
-      angleBetweenPoints(points.at(-2), points.at(-1)),
-      angledPositionFromPoint({
-        angle: outerCircleAngle,
-        point: { x, y },
-        distance: fruitSize,
-      })
-    );
 
     const outerCirclePos = angledPositionFromPoint({
       angle: outerCircleAngle,

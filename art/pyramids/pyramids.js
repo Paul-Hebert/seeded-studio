@@ -1,6 +1,6 @@
 import { randomHsl, randomInt, setSeed } from "randomness-helpers";
-import { buildSvg } from "../../helpers/build-svg.mjs";
-import { buildFunctionEndpoint } from "../helpers/build-function-endpoint.mjs";
+import { buildSvg } from "../../helpers/build-svg.js";
+import { buildFunctionEndpoint } from "../../helpers/build-function-endpoint.js";
 
 export const handler = buildFunctionEndpoint((seed) => {
   setSeed(seed);

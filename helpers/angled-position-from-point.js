@@ -1,4 +1,4 @@
-import { degreesToRadians } from "./degrees-to-radians.mjs";
+import { degreesToRadians } from "./degrees-to-radians.js";
 
 export function angledPositionFromPoint({ angle, point, distance }) {
   // TODO: is this right?

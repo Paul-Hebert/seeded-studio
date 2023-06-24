@@ -34,8 +34,8 @@ description: ${description}
 ---`
   );
   writeFileSync(
-    `./art/${slug}/${slug}.mjs`,
-    `import { buildSvg } from "../../helpers/build-svg.mjs";
+    `./art/${slug}/${slug}.js`,
+    `import { buildSvg } from "../../helpers/build-svg.js";
 import { setSeed, randomHsl } from 'randomness-helpers';
 
 export function draw (seed) {
