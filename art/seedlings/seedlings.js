@@ -3,16 +3,13 @@ import {
   randomInt,
   randomChanceOfNegative,
   randomHsl,
-  setSeed,
 } from "randomness-helpers";
 import { spline } from "@georgedoescode/spline";
 import { angledPositionFromPoint } from "../../helpers/angled-position-from-point.js";
 import { angleBetweenPoints } from "../../helpers/angle-between-points.js";
 import { buildFunctionEndpoint } from "../../helpers/build-function-endpoint.js";
 
-export const handler = buildFunctionEndpoint((seed) => {
-  setSeed(seed);
-
+export const handler = buildFunctionEndpoint(() => {
   const viewBoxWidth = 1100;
   const viewBoxHeight = 850;
   const frameSize = 100;

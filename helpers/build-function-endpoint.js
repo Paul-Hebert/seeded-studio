@@ -1,4 +1,5 @@
 import { builder } from "@netlify/functions";
+import { setSeed } from "randomness-helpers";
 
 export function buildFunctionEndpoint(drawFunction) {
   const myHandler = async (event) => {
@@ -7,6 +8,8 @@ export function buildFunctionEndpoint(drawFunction) {
       .split("/");
 
     const seed = pathChunks[pathChunks.length - 1];
+
+    setSeed(seed);
 
     return {
       statusCode: 200,

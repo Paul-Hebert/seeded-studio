@@ -1,10 +1,8 @@
-import { randomHsl, randomInt, setSeed } from "randomness-helpers";
+import { randomHsl, randomInt } from "randomness-helpers";
 import { buildSvg } from "../../helpers/build-svg.js";
 import { buildFunctionEndpoint } from "../../helpers/build-function-endpoint.js";
 
 export const handler = buildFunctionEndpoint((seed) => {
-  setSeed(seed);
-
   let markup = "";
 
   const squareSize = randomInt(8, 15);
