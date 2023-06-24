@@ -5,4 +5,6 @@ module.exports = (eleventyConfig) => {
   eleventyConfig.addCollection("art", function (collection) {
     return collection.getFilteredByGlob("art/*/*.md");
   });
+
+  eleventyConfig.setQuietMode(true);
 };
