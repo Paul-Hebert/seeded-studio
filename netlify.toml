@@ -1,4 +1,5 @@
 # Include all files in all functions
 [functions]
-  included_files = ["art/**", "helpers/**"]
+  included_files = ["helpers/**"]
   node_bundler = "esbuild"
+  directory = 'art'

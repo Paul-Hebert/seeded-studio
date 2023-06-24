@@ -10,7 +10,7 @@
 
     {% for i in range(0, 10) %}
       <img 
-        src="{{data.functions_host}}/.netlify/functions/draw/{{ name }}/{{ i }}" 
+        src="{{data.functions_host}}/.netlify/functions/{{ name }}/{{ i }}" 
         alt="An artwork procedurally generated using the algorithm {{ title }} and the seed {{ i }}."
       />
     {% endfor %}

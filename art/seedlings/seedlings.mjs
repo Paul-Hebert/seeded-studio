@@ -5,11 +5,12 @@ import {
   randomHsl,
   setSeed,
 } from "randomness-helpers";
-import { spline } from "../../helpers/spline.mjs";
+import { spline } from "@georgedoescode/spline";
 import { angledPositionFromPoint } from "../../helpers/angled-position-from-point.mjs";
 import { angleBetweenPoints } from "../../helpers/angle-between-points.mjs";
+import { buildFunctionEndpoint } from "../helpers/build-function-endpoint.mjs";
 
-export function draw(seed) {
+export const handler = buildFunctionEndpoint((seed) => {
   setSeed(seed);
 
   const viewBoxWidth = 1100;
@@ -159,4 +160,4 @@ export function draw(seed) {
     viewBoxWidth,
     viewBoxHeight,
   });
-}
+});

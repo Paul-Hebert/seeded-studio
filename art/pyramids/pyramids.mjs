@@ -1,7 +1,8 @@
 import { randomHsl, randomInt, setSeed } from "randomness-helpers";
 import { buildSvg } from "../../helpers/build-svg.mjs";
+import { buildFunctionEndpoint } from "../helpers/build-function-endpoint.mjs";
 
-export function draw(seed) {
+export const handler = buildFunctionEndpoint((seed) => {
   setSeed(seed);
 
   let markup = "";
@@ -47,4 +48,4 @@ export function draw(seed) {
   }
 
   return buildSvg({ content: markup });
-}
+});
