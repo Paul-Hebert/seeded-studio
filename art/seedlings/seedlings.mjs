@@ -2,7 +2,7 @@ import { buildSvg } from "../../helpers/build-svg.mjs";
 import {
   randomInt,
   randomChanceOfNegative,
-  randomDegree,
+  randomHsl,
   setSeed,
 } from "randomness-helpers";
 import { spline } from "../../helpers/spline.mjs";
@@ -22,6 +22,10 @@ export function draw(seed) {
 
   const lineCount = randomInt(5, 10);
 
+  const detailColor = "green";
+  const stemColor = randomHsl({ h: 240, s: [40, 79], l: [30, 70] });
+  const flowerButtColor = randomHsl({ h: 300, s: 50, l: [30, 70] });
+
   for (let i = 0; i < lineCount; i++) {
     let y = viewBoxHeight - frameSize;
     const xRange = viewBoxWidth - frameSize * 4;
@@ -38,28 +42,55 @@ export function draw(seed) {
     lines.push(
       `<path 
         fill="none"
-        stroke="#000"
+        stroke="${stemColor}"
         d="${spline(points)}" 
-        stroke-width="10"
+        stroke-width="8"
         stroke-linecap="round"
       />`
     );
 
+    // points.forEach((point) =>
+    //   lines.push(`<circle cx="${point.x}" cy="${point.y}" r="6" />`)
+    // );
+
     const fruitSize = randomInt(20, 50);
 
-    const outerCircleAngle = angleBetweenPoints(points.at(-1), points.at(-2));
+    const outerCircleAngle = angleBetweenPoints(points.at(-2), points.at(-1));
+
+    console.log(
+      points.at(-2),
+      points.at(-1),
+      angleBetweenPoints(points.at(-2), points.at(-1)),
+      angledPositionFromPoint({
+        angle: outerCircleAngle,
+        point: { x, y },
+        distance: fruitSize,
+      })
+    );
 
     const outerCirclePos = angledPositionFromPoint({
       angle: outerCircleAngle,
       point: { x, y },
-      distance: fruitSize / 3,
+      distance: fruitSize,
     });
+
+    // const stamenPos = angledPositionFromPoint({
+    //   angle: outerCircleAngle,
+    //   point: { x, y },
+    //   distance: fruitSize * 2.5,
+    // });
 
     fruits.push(
       `<circle cx="${outerCirclePos.x}" cy="${outerCirclePos.y}" r="${fruitSize}" fill="#fff" stroke-width="2" />`
     );
 
     let fruitDetail = `<circle cx="${outerCirclePos.x}" cy="${outerCirclePos.y}" r="${fruitSize}" fill="#fff" />`;
+
+    // fruitDetail += `<line x1="${x}" y1="${y}" x2="${stamenPos.x}" y2="${stamenPos.y}" stroke="${detailColor}" stroke-width="5" />`;
+
+    // fruitDetail += `<circle cx="${stamenPos.x}" cy="${stamenPos.y}" r="${
+    //   fruitSize / 5
+    // }" fill="${detailColor}" />`;
 
     const innerCircleSize = randomInt(fruitSize / 5, fruitSize / 3);
 
@@ -81,21 +112,21 @@ export function draw(seed) {
           x2="${outerCirclePoint.x}" 
           y2="${outerCirclePoint.y}"
           fill="none"
-          stroke="#000"
+          stroke="${detailColor}"
 
         />
       `;
     }
 
-    fruitDetail += `<circle cx="${x}" cy="${y}" r="${innerCircleSize}" stroke="#000" fill="none" stroke-width="2" />`;
-    fruitDetail += `<circle cx="${outerCirclePos.x}" cy="${outerCirclePos.y}" r="${fruitSize}" stroke="#000" fill="none" stroke-width="2" />`;
+    fruitDetail += `<circle cx="${x}" cy="${y}" r="${innerCircleSize}" fill="none" stroke="${flowerButtColor}" stroke-width="2" />`;
+    // fruitDetail += `<circle cx="${outerCirclePos.x}" cy="${outerCirclePos.y}" r="${fruitSize}" stroke="#000" fill="none" stroke-width="2" />`;
 
     fruitDetails.push(fruitDetail);
   }
 
   return buildSvg({
     content: `
-      <g class="0 frame-light">
+      <g inkscape:groupmode="layer" inkscape:label="0 frame-light">
         <rect
           x="${frameSize - frameWidth}" 
           y="${frameSize - frameWidth}" 
@@ -106,7 +137,7 @@ export function draw(seed) {
           stroke-width="2"
         />
       </g>
-      <g class="1 dark">
+      <g inkscape:groupmode="layer" inkscape:label="1 dark">
         <rect
           x="${frameSize}" 
           y="${frameSize}" 
@@ -117,9 +148,11 @@ export function draw(seed) {
           stroke-width="10"
         />
       </g>
-      <g class="2 circles">
+      <g inkscape:groupmode="layer" inkscape:label="2 circles">
         ${fruits.join("")}
         ${fruitDetails.join("")}
+      </g>
+      <g inkscape:groupmode="layer" inkscape:label="1 lines">
         ${lines.join("")}
       </g>
     `,

@@ -7,5 +7,6 @@ export function angleBetweenPoints(origin, target) {
   theta *= 180 / Math.PI; // [0, 180] then [-180, 0]; clockwise; 0° = east
   if (theta < 0) theta += 360; // [0, 360]; clockwise; 0° = east
 
-  return theta;
+  // TODO: Is this right?
+  return theta - 90;
 }

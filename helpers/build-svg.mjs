@@ -12,6 +12,7 @@ export function buildSvg({
       width="${displayWidth || viewBoxWidth}" 
       height="${displayHeight || viewBoxHeight}" 
       xmlns="http://www.w3.org/2000/svg"
+      xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
       ${attributes}
     >
       ${content}
