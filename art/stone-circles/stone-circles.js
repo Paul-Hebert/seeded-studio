@@ -47,16 +47,16 @@ export const handler = buildFunctionEndpoint((seed) => {
   }
 
   const frame = `
-    <rect fill="#fff" x="-500" y="-500" width="600" height="${
+    <rect fill="#fff" x="-500" y="-500" width="620" height="${
       viewBoxHeight + 1000
     }"/>
     <rect fill="#fff" x="${
-      viewBoxWidth - frameSize
-    }" y="-500" width="600" height="${viewBoxHeight + 1000}"/>
+      viewBoxWidth - frameSize - 20
+    }" y="-500" width="620" height="${viewBoxHeight + 1000}"/>
     <rect fill="#fff" x="-500" y="-500" width="${
       viewBoxWidth + 1000
-    }" height="600"/>
-    <rect fill="#fff" x="-500" y="${viewBoxHeight - frameSize}" width="${
+    }" height="620"/>
+    <rect fill="#fff" x="-500" y="${viewBoxHeight - frameSize - 20}" width="${
     viewBoxWidth + 1000
   }" height="600"/>
     <rect
