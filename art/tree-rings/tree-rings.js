@@ -1,128 +1,150 @@
 import { buildSvg } from "../../helpers/build-svg.js";
 import { buildFunctionEndpoint } from "../../helpers/build-function-endpoint.js";
-import { random, randomInt } from "randomness-helpers";
-import { angleBetweenPoints } from "../../helpers/angle-between-points.js";
-import { distanceBetweenPoints } from "../../helpers/distance-between-points.js";
+import { random, randomInt, randomDegree } from "randomness-helpers";
 import { angledPositionFromPoint } from "../../helpers/angled-position-from-point.js";
 import { spline } from "@georgedoescode/spline";
+import { pointsOnPath } from "points-on-path";
 
 export const handler = buildFunctionEndpoint(() => {
   const centerPos = { x: 500, y: 500 };
   const outerCircleRadius = randomInt(300, 350);
 
-  const innerCircleRadius = -8;
-  const innerCirclePos = {
-    x: 500 + randomInt(-100, 100),
-    y: 500 + randomInt(-100, 100),
-  };
+  const ringAngleDiff = randomDegree(0, 360);
 
-  const ringCount = randomInt(50, 80);
-  const rings = [];
+  let pos = centerPos;
+  let radius = outerCircleRadius;
 
-  const ringAngleDiff = angleBetweenPoints(innerCirclePos, centerPos);
-  const ringPosDiff = distanceBetweenPoints(innerCirclePos, centerPos);
-
-  const ringSizeDelta = (outerCircleRadius - innerCircleRadius) / ringCount;
-  const ringPosDelta = ringPosDiff / ringCount;
-
-  let pos = innerCirclePos;
-  let radius = innerCircleRadius;
-
-  const pointCount = randomInt(100, 200);
+  const pointCount = randomInt(10, 20);
   const pointModifiers = [];
-  const modifierRange = 0.0054;
+  const modifierRange = 0.015;
 
   for (let i = 0; i < pointCount; i++) {
     pointModifiers.push(random(1 - modifierRange, 1 + modifierRange));
   }
 
-  let lastRingPoints;
+  const outerRing = addRing({ pointCount, pointModifiers, pos, radius });
 
-  while (radius <= outerCircleRadius) {
+  const rings = [outerRing.ring];
+
+  const innerSize = randomInt(50, 100);
+
+  while (radius > 0) {
+    const isInner = radius < innerSize;
+
+    const posDiff = isInner ? 200 : 75;
+
     pos = angledPositionFromPoint({
       angle: ringAngleDiff,
       point: pos,
-      distance: ringPosDelta * random(0.7, 1.3),
+      distance: (radius / posDiff) * random(0.7, 1.3),
     });
-    radius += ringSizeDelta * random(0.7, 1.3);
+
+    const sizeDiff = isInner ? 2 : 10;
+
+    radius -= sizeDiff * random(0.4, 1.4);
 
     const newRing = addRing({ pointCount, pointModifiers, pos, radius });
     rings.push(newRing.ring);
-    lastRingPoints = newRing.points;
   }
 
-  for (let i = 0; i < 5; i++) {
-    rings.push(
-      addRing({
-        pointCount,
-        pointModifiers,
-        pos,
-        radius: (radius += random(-3, 3)),
-      }).ring
-    );
+  radius = outerCircleRadius + randomInt(30, 50);
+  pos = centerPos;
+
+  const barkRingBase = addRing({ pointCount, pointModifiers, pos, radius });
+
+  let modifiedBarkRingPoints = pointsOnPath(
+    spline(barkRingBase.points, 1, true),
+    0.25,
+    0.25
+  )[0];
+
+  const startingBarkModifier = 3.25;
+
+  modifiedBarkRingPoints = modifiedBarkRingPoints.map((point) => ({
+    x: point[0] + randomInt(-1 * startingBarkModifier, startingBarkModifier),
+    y: point[1] + randomInt(-1 * startingBarkModifier, startingBarkModifier),
+  }));
+
+  for (let i = 0; i < 10; i++) {
+    modifiedBarkRingPoints = modifiedBarkRingPoints.map((point) => ({
+      x: point.x + randomInt(-1, 1),
+      y: point.y + randomInt(-1, 1),
+    }));
+
+    rings.push(`
+      <path
+        d="${spline(modifiedBarkRingPoints, 1, true)}"
+        fill="none"
+        stroke="#000"
+        class="bark-ring"
+      />`);
   }
 
-  radius += randomInt(20, 50);
+  let modifiedOuterRingPoints = pointsOnPath(
+    spline(outerRing.points, 1, true),
+    0.25,
+    0.25
+  )[0];
 
-  const barkRing = addRing({ pointCount, pointModifiers, pos, radius });
+  modifiedOuterRingPoints = modifiedOuterRingPoints.map((point) => ({
+    x: point[0],
+    y: point[1],
+  }));
 
-  rings.push(barkRing.ring);
+  for (let i = 0; i < 10; i++) {
+    modifiedOuterRingPoints = modifiedOuterRingPoints.map((point) => ({
+      x: point.x + randomInt(-0.5, 0.5),
+      y: point.y + randomInt(-0.5, 0.5),
+    }));
+
+    rings.push(`
+      <path
+        d="${spline(modifiedOuterRingPoints, 1, true)}"
+        fill="none"
+        stroke="#000"
+        class="bark-ring"
+      />`);
+  }
 
   const barkLines = [];
 
-  for (let i = 0; i < barkRing.points.length; i++) {
-    for (let z = -2; z <= 2; z++) {
-      let index = i + z + randomInt(-3, 3);
-      if (index < 0) {
-        index += pointCount;
-      }
-      if (index > pointCount - 1) {
-        index -= pointCount;
-      }
+  for (let i = 0; i < modifiedBarkRingPoints.length; i++) {
+    for (let z = 0; z <= 20; z++) {
+      const percentComplete = i / modifiedBarkRingPoints.length;
+      const innerIndex =
+        Math.round(modifiedOuterRingPoints.length * percentComplete) +
+        randomInt(-5, 5);
+
+      const outerIndex = i + randomInt(-5, 5);
 
       barkLines.push(`
-        <line 
-          x1="${barkRing.points[i].x}"
-          y1="${barkRing.points[i].y}"
-          x2="${lastRingPoints[index].x}"
-          y2="${lastRingPoints[index].y}"
-          stroke="#000" 
-          fill="none"
-        />
-      `);
-      barkLines.push(`
-        <line 
-          x1="${barkRing.points[index].x}"
-          y1="${barkRing.points[index].y}"
-          x2="${lastRingPoints[i].x}"
-          y2="${lastRingPoints[i].y}"
-          stroke="#000" 
+        <line
+          x1="${
+            modifiedBarkRingPoints[
+              constrainIndex(outerIndex, modifiedBarkRingPoints)
+            ].x
+          }"
+          y1="${
+            modifiedBarkRingPoints[
+              constrainIndex(outerIndex, modifiedBarkRingPoints)
+            ].y
+          }"
+          x2="${
+            modifiedOuterRingPoints[
+              constrainIndex(innerIndex, modifiedOuterRingPoints)
+            ].x
+          }"
+          y2="${
+            modifiedOuterRingPoints[
+              constrainIndex(innerIndex, modifiedOuterRingPoints)
+            ].y
+          }"
+          stroke="#000"
           fill="none"
         />
       `);
     }
   }
-
-  for (let i = 0; i < 5; i++) {
-    rings.push(
-      addRing({
-        pointCount,
-        pointModifiers,
-        pos,
-        radius: (radius += random(-2, 2)),
-      }).ring
-    );
-  }
-
-  // rings.push(`
-  //     <circle
-  //       cx='${centerPos.x}'
-  //       cy='${centerPos.y}'
-  //       r='${outerCircleRadius}'
-  //       fill="none"
-  //       stroke="green"
-  //     />
-  //   `);
 
   return buildSvg({
     viewBoxWidth: 1000,
@@ -135,6 +157,8 @@ export const handler = buildFunctionEndpoint(() => {
 
 function addRing({ pointCount, pointModifiers, pos, radius }) {
   let points = [];
+
+  const startModifier = randomInt(0, pointCount - 1);
 
   for (let i = 0; i < pointCount; i++) {
     const angle = (360 / pointCount) * i;
@@ -157,4 +181,17 @@ function addRing({ pointCount, pointModifiers, pos, radius }) {
     `,
     points,
   };
+}
+
+function constrainIndex(index, array) {
+  const length = array.length;
+
+  if (index >= length) {
+    index -= length;
+  }
+  if (index < 0) {
+    index += length;
+  }
+
+  return index;
 }

@@ -21,6 +21,7 @@
   "homepage": "https://github.com/Paul-Hebert/seeded-studio",
   "dependencies": {
     "@georgedoescode/spline": "^1.0.1",
+    "points-on-path": "^0.2.1",
     "prompts": "^2.4.2",
     "randomness-helpers": "^0.0.1"
   },
