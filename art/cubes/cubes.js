@@ -5,6 +5,7 @@ import { angledPositionFromPoint } from "../../helpers/angled-position-from-poin
 import { spline } from "@georgedoescode/spline";
 import { randomHsl } from "randomness-helpers";
 import { randomHue } from "randomness-helpers";
+import { spiralPoints } from "../../bits/shapes/spiral-points.js";
 
 export const handler = buildFunctionEndpoint(() => {
   const viewBoxWidth = 1000;
@@ -117,14 +118,32 @@ export const handler = buildFunctionEndpoint(() => {
 
         points.push(point);
 
-        if (randomizedModifier > 10 && randomChance(0.2)) {
-          lines.push(
-            `<circle 
-              cx="${point.x + randomInt(-30, 30)}" 
-              cy="${point.y - randomInt(30, 120)}" 
-              r="${randomInt(5, 10)}" 
-              fill="${randomHsl({ h: hue, l: [30, 70] })}" />`
-          );
+        if (randomizedModifier > 80 && randomChance(0.2)) {
+          const spiralX = point.x;
+          const spiralY = point.y - randomInt(30, 120);
+          const spiralR = randomInt(10, 30);
+          const spiralStroke = randomHsl({ h: hue, l: [30, 70] });
+          const newSpiralPoints = spiralPoints({
+            x: spiralX,
+            y: spiralY,
+            r: spiralR,
+          });
+          lines.push(`
+            <g 
+              class="spiral"
+            >
+              <circle 
+                cx="${spiralX}" 
+                cy="${spiralY}" 
+                r="${spiralR}" 
+                fill="#fff"
+                stroke="${spiralStroke}" />
+              
+              <path
+                d="${spline(newSpiralPoints)}"
+                fill="none"
+                stroke="${spiralStroke}" />
+            </g>`);
         }
       }
 
