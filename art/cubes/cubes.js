@@ -47,7 +47,7 @@ export const handler = buildFunctionEndpoint(() => {
     const baseAngle = 90 + sideAngle;
     const calculatedAngle = reverse ? baseAngle : 360 - baseAngle;
 
-    for (let y = startY; y >= topY; y -= spaceBetweenLines) {
+    for (let y = startY; Math.round(y) >= topY; y -= spaceBetweenLines) {
       const startPoint = {
         x: centerX,
         y,
