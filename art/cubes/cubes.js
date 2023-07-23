@@ -7,6 +7,7 @@ import { randomHsl } from "randomness-helpers";
 import { randomHue } from "randomness-helpers";
 import { spiralPoints } from "../../bits/shapes/spiral-points.js";
 import FastNoise from "fastnoise-lite";
+import { randomItemInArray } from "randomness-helpers";
 
 export const handler = buildFunctionEndpoint((seed) => {
   const viewBoxWidth = 1000;
@@ -74,7 +75,18 @@ export const handler = buildFunctionEndpoint((seed) => {
 
   function topSide() {
     const noise = new FastNoise();
-    noise.SetNoiseType(FastNoise.NoiseType.OpenSimplex2);
+    noise.SetNoiseType(
+      FastNoise.NoiseType[
+        randomItemInArray([
+          "OpenSimplex2",
+          "OpenSimplex2S",
+          "Cellular",
+          "Perlin",
+          // "ValueCubic",
+          // "Value",
+        ])
+      ]
+    );
     noise.SetSeed(seed);
     noise.SetFrequency(0.01);
 
