@@ -6,8 +6,9 @@ import { spline } from "@georgedoescode/spline";
 import { randomHsl } from "randomness-helpers";
 import { randomHue } from "randomness-helpers";
 import { spiralPoints } from "../../bits/shapes/spiral-points.js";
+import FastNoise from "fastnoise-lite";
 
-export const handler = buildFunctionEndpoint(() => {
+export const handler = buildFunctionEndpoint((seed) => {
   const viewBoxWidth = 1000;
   const viewBoxHeight = 1000;
 
@@ -18,7 +19,7 @@ export const handler = buildFunctionEndpoint(() => {
   const centerX = viewBoxWidth / 2;
 
   const sideSize = randomInt(300, 400);
-  const numberOfLines = randomInt(20, 40);
+  const numberOfLines = randomInt(50, 100);
   const spaceBetweenLines = sideSize / numberOfLines;
 
   const startY = viewBoxHeight - viewBoxHeight / 10;
@@ -72,6 +73,11 @@ export const handler = buildFunctionEndpoint(() => {
   }
 
   function topSide() {
+    const noise = new FastNoise();
+    noise.SetNoiseType(FastNoise.NoiseType.OpenSimplex2);
+    noise.SetSeed(seed);
+    noise.SetFrequency(0.01);
+
     const lines = [];
     for (
       let distance = sideSize;
@@ -98,7 +104,7 @@ export const handler = buildFunctionEndpoint(() => {
       for (
         let altDistance = spaceBetweenLines;
         altDistance < sideSize;
-        altDistance += spaceBetweenLines * randomInt(3, 5)
+        altDistance += spaceBetweenLines
       ) {
         const point = angledPositionFromPoint({
           angle: 360 - 90 - sideAngle,
@@ -106,45 +112,47 @@ export const handler = buildFunctionEndpoint(() => {
           distance: altDistance,
         });
         const modifier =
-          distance > sideSize / 2 ? sideSize - distance : distance;
+          (distance > sideSize / 2 ? sideSize - distance : distance) + 1;
         const altModifier =
-          altDistance > sideSize / 2 ? sideSize - altDistance : altDistance;
+          (altDistance > sideSize / 2 ? sideSize - altDistance : altDistance) +
+          1;
 
         const comboModifier =
-          ((modifier + altModifier) * (modifier + altModifier)) / 5;
+          ((modifier + altModifier) * (modifier + altModifier)) / 1000;
 
-        const randomizedModifier = comboModifier * random(0.003, 0.006);
+        const randomizedModifier =
+          comboModifier * (1 + noise.GetNoise(distance, altDistance));
         point.y -= randomizedModifier;
 
         points.push(point);
 
-        if (randomizedModifier > 80 && randomChance(0.2)) {
-          const spiralX = point.x;
-          const spiralY = point.y - randomInt(30, 120);
-          const spiralR = randomInt(10, 30);
-          const spiralStroke = randomHsl({ h: hue, l: [30, 70] });
-          const newSpiralPoints = spiralPoints({
-            x: spiralX,
-            y: spiralY,
-            r: spiralR,
-          });
-          lines.push(`
-            <g 
-              class="spiral"
-            >
-              <circle 
-                cx="${spiralX}" 
-                cy="${spiralY}" 
-                r="${spiralR}" 
-                fill="#fff"
-                stroke="${spiralStroke}" />
-              
-              <path
-                d="${spline(newSpiralPoints)}"
-                fill="none"
-                stroke="${spiralStroke}" />
-            </g>`);
-        }
+        // if (randomizedModifier > 10 && randomChance(0.01)) {
+        //   const spiralX = point.x;
+        //   const spiralY = point.y - randomInt(30, 120);
+        //   const spiralR = randomInt(10, 30);
+        //   const spiralStroke = randomHsl({ h: hue, l: [30, 70] });
+        //   const newSpiralPoints = spiralPoints({
+        //     x: spiralX,
+        //     y: spiralY,
+        //     r: spiralR,
+        //   });
+        //   lines.push(`
+        //     <g
+        //       class="spiral"
+        //     >
+        //       <circle
+        //         cx="${spiralX}"
+        //         cy="${spiralY}"
+        //         r="${spiralR}"
+        //         fill="#fff"
+        //         stroke="${spiralStroke}" />
+
+        //       <path
+        //         d="${spline(newSpiralPoints)}"
+        //         fill="none"
+        //         stroke="${spiralStroke}" />
+        //     </g>`);
+        // }
       }
 
       lines.push(`

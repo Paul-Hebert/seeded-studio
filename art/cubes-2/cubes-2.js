@@ -23,7 +23,7 @@ export const handler = buildFunctionEndpoint((seed) => {
   const bottomY = viewBoxHeight - viewBoxHeight / 10;
   const topY = bottomY - sideSize;
 
-  const numberOfLines = randomInt(10, 15);
+  const numberOfLines = randomInt(7, 12);
   const spaceBetweenLines = sideSize / numberOfLines;
 
   const sideAngle = randomInt(20, 30);
@@ -41,7 +41,7 @@ export const handler = buildFunctionEndpoint((seed) => {
         baseColor: randomHsl({ h: hue, s: sat, l: light }),
         centerX,
       }) +
-      // blockers({ centerX, sideAngle, sideSize, bottomY, topY }) +
+      blockers({ centerX, sideAngle, sideSize, bottomY, topY }) +
       centerLine({
         centerX,
         topY,
@@ -176,7 +176,7 @@ function buildTopGrid({ seed, numberOfLines, sideSize }) {
   const noise = new FastNoise();
   noise.SetNoiseType(FastNoise.NoiseType.OpenSimplex2);
   noise.SetSeed(seed);
-  noise.SetFrequency(20 / numberOfLines);
+  noise.SetFrequency(15);
 
   const points = [];
 
@@ -187,7 +187,11 @@ function buildTopGrid({ seed, numberOfLines, sideSize }) {
       const modifier = (x > numberOfLines / 2 ? numberOfLines - x : x) + 1;
       const altModifier = (y > numberOfLines / 2 ? numberOfLines - y : y) + 1;
 
-      row.push(modifier * altModifier * (1 + noise.GetNoise(x / 5, y / 5)) * 3);
+      row.push(
+        ((modifier * altModifier) / numberOfLines) *
+          (1 + noise.GetNoise(x / numberOfLines, y / numberOfLines)) *
+          30
+      );
     }
 
     points.push(row);
@@ -301,7 +305,8 @@ function buildTopLine({
     ? `stroke="${baseColor}" fill="none"`
     : 'fill="#fff"';
 
-  let pathData = spline([startPoint, ...points]);
+  // let pathData = spline([startPoint, ...points]);
+  let pathData = zigZag([startPoint, ...points]);
 
   if (isStroked) {
     const bottomPoint = {
