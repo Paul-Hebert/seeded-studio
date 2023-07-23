@@ -5,8 +5,10 @@ import { angledPositionFromPoint } from "../../helpers/angled-position-from-poin
 import { spline } from "@georgedoescode/spline";
 import { randomHsl } from "randomness-helpers";
 import { randomHue } from "randomness-helpers";
+import { zigZag } from "../../bits/shapes/zig-zag.js";
+import FastNoise from "fastnoise-lite";
 
-export const handler = buildFunctionEndpoint(() => {
+export const handler = buildFunctionEndpoint((seed) => {
   const viewBoxWidth = 1000;
   const viewBoxHeight = 1000;
 
@@ -21,7 +23,7 @@ export const handler = buildFunctionEndpoint(() => {
   const bottomY = viewBoxHeight - viewBoxHeight / 10;
   const topY = bottomY - sideSize;
 
-  const numberOfLines = randomInt(10, 20);
+  const numberOfLines = randomInt(10, 15);
   const spaceBetweenLines = sideSize / numberOfLines;
 
   const sideAngle = randomInt(20, 30);
@@ -39,7 +41,7 @@ export const handler = buildFunctionEndpoint(() => {
         baseColor: randomHsl({ h: hue, s: sat, l: light }),
         centerX,
       }) +
-      blockers({ centerX, sideAngle, sideSize, bottomY, topY }) +
+      // blockers({ centerX, sideAngle, sideSize, bottomY, topY }) +
       centerLine({
         centerX,
         topY,
@@ -47,6 +49,7 @@ export const handler = buildFunctionEndpoint(() => {
         baseColor: randomHsl({ h: hue + 120, s: sat, l: light }),
       }) +
       buildTopLines({
+        seed,
         sideSize,
         sideAngle,
         numberOfLines,
@@ -169,17 +172,22 @@ function centerLine({ centerX, topY, bottomY, baseColor }) {
       `;
 }
 
-function buildTopGrid({ numberOfLines, sideSize }) {
+function buildTopGrid({ seed, numberOfLines, sideSize }) {
+  const noise = new FastNoise();
+  noise.SetNoiseType(FastNoise.NoiseType.OpenSimplex2);
+  noise.SetSeed(seed);
+  noise.SetFrequency(20 / numberOfLines);
+
   const points = [];
 
   for (let x = 0; x < numberOfLines; x++) {
     const row = [];
 
     for (let y = 0; y < numberOfLines; y++) {
-      const modifier = x > numberOfLines / 2 ? numberOfLines - x : x;
-      const altModifier = y > numberOfLines / 2 ? numberOfLines - y : y;
+      const modifier = (x > numberOfLines / 2 ? numberOfLines - x : x) + 1;
+      const altModifier = (y > numberOfLines / 2 ? numberOfLines - y : y) + 1;
 
-      row.push(modifier * altModifier * random(2, 5));
+      row.push(modifier * altModifier * (1 + noise.GetNoise(x / 5, y / 5)) * 3);
     }
 
     points.push(row);
@@ -189,6 +197,7 @@ function buildTopGrid({ numberOfLines, sideSize }) {
 }
 
 function buildTopLines({
+  seed,
   sideSize,
   numberOfLines,
   spaceBetweenLines,
@@ -199,7 +208,7 @@ function buildTopLines({
   sat,
   light,
 }) {
-  const grid = buildTopGrid({ numberOfLines, sideSize });
+  const grid = buildTopGrid({ seed, numberOfLines, sideSize });
 
   const centerPoint = {
     x: centerX,
@@ -232,10 +241,9 @@ function buildTopLines({
     lines.push(`
       <g class="top-layer">
       ${
-        buildTopLine({ ...lineSettings, isStroked: false }) +
-        buildTopLine({ ...reversedSettings, isStroked: false }) +
-        buildTopLine(lineSettings) +
-        buildTopLine(reversedSettings)
+        // buildTopLine({ ...lineSettings, isStroked: false }) +
+        // buildTopLine({ ...reversedSettings, isStroked: false }) +
+        buildTopLine(lineSettings) + buildTopLine(reversedSettings)
       }
       </g>
     `);
@@ -272,18 +280,19 @@ function buildTopLine({
 
   for (let pointCount = 0; pointCount < grid.length; pointCount++) {
     const point = angledPositionFromPoint({
+      // TODO: should htis flip?
       angle: flippedAngle,
       point: startPoint,
-      distance: pointCount * spaceBetweenLines,
+      distance: (pointCount + 1) * spaceBetweenLines,
     });
 
-    const mod = reversed
-      ? grid[depth - 1][pointCount - 1]
-      : grid[grid.length - depth][grid.length - pointCount];
+    console.log((pointCount + 1) * spaceBetweenLines);
 
-    if (!isNaN(mod)) {
-      point.y -= mod;
-    }
+    const mod = reversed
+      ? grid[pointCount][depth - 1]
+      : grid[depth - 1][pointCount];
+
+    point.y -= mod;
 
     points.push(point);
   }
@@ -292,7 +301,7 @@ function buildTopLine({
     ? `stroke="${baseColor}" fill="none"`
     : 'fill="#fff"';
 
-  let pathData = spline([startPoint, ...points, endPoint]);
+  let pathData = spline([startPoint, ...points]);
 
   if (isStroked) {
     const bottomPoint = {
@@ -300,10 +309,16 @@ function buildTopLine({
       y: centerPoint.y + sideSize,
     };
     pathData = `M${bottomPoint.x} ${bottomPoint.y} L${pathData.slice(1)}`;
+    // pathData = `
+    //   M${bottomPoint.x} ${bottomPoint.y}
+    //   Q${startPoint.x} ${bottomPoint.y} ${pathData.slice(1)}
+    // `;
   }
 
   return `
+    
     <path
+      class="top"
       d="${pathData}"
       ${styles}
     />
