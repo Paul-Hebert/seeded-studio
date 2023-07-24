@@ -4,7 +4,7 @@ import { angledPositionFromPoint } from "../../helpers/angled-position-from-poin
 export function spiralPoints({ x, y, r, angle = randomDegree() }) {
   const points = [];
 
-  const delta = r / 75;
+  const delta = r / 50;
 
   let distance = 0;
 
