@@ -4,8 +4,8 @@ import { randomInt, random } from "randomness-helpers";
 
 export const handler = buildFunctionEndpoint(() => {
   const height = randomInt(300, 850);
-  const strokeWidth = 5;
-  opacity = 0.75;
+  const strokeWidth = 10;
+  opacity = 0.45;
 
   return buildSvg({
     viewBoxWidth: 1000,
@@ -21,7 +21,7 @@ function trunk({ x, y, height, strokeWidth, opacity }) {
   for (let i = 0; i < height / 100; i++) {
     lines.push(`
       <line
-        x1="${x - strokeWidth * i}"
+        x1="${x - (strokeWidth * i) / 2}"
         x2="${x}"
         y1="${y}"
         y2="${y - height}"
@@ -30,7 +30,7 @@ function trunk({ x, y, height, strokeWidth, opacity }) {
         stroke-width="${strokeWidth}"
       />
       <line
-        x1="${x + strokeWidth * i}"
+        x1="${x + (strokeWidth * i) / 2}"
         x2="${x}"
         y1="${y}"
         y2="${y - height}"
@@ -47,8 +47,8 @@ function branches({ x, y, height, strokeWidth, opacity }) {
   const lines = [];
   for (
     let distanceTravelled = 0;
-    distanceTravelled < height / random(1.75, 2);
-    distanceTravelled += height / randomInt(100, 150)
+    distanceTravelled < height / random(2, 2.25);
+    distanceTravelled += height / randomInt(75, 100)
   ) {
     const branchSize = 10 + distanceTravelled * random(0.4, 0.8);
     const yStart = y - height + distanceTravelled;
@@ -56,11 +56,11 @@ function branches({ x, y, height, strokeWidth, opacity }) {
     for (
       let xMod = branchSize * -1;
       xMod < branchSize;
-      xMod += randomInt(10, 30)
+      xMod += randomInt(10, 30) - branchSize / 60
     ) {
       const yTop = yStart + randomInt(-1 * randomMod, randomMod);
       let yBottom = yTop + branchSize;
-      yBottom += (branchSize - Math.abs(xMod)) / (branchSize / 25);
+      yBottom += (branchSize - Math.abs(xMod)) / (branchSize / 45);
 
       lines.push(`
         <path
