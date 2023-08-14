@@ -13,17 +13,17 @@ import FastNoise from "fastnoise-lite";
 import { inkscapeLayer } from "../../helpers/inkscape-layer.js";
 
 export const handler = buildFunctionEndpoint((seed) => {
-  const viewBoxWidth = 5000;
+  const viewBoxWidth = 4500;
   const viewBoxHeight = 3000;
 
   const hue = randomHue();
 
-  const baseColor = randomHsl({ h: hue, s: [40, 80], l: [70, 80] });
-  const fillColor = randomHsl({ h: hue, s: [10, 30], l: [20, 30] });
+  const baseColor = randomHsl({ h: hue, s: [40, 80], l: [70, 90] });
+  const fillColor = randomHsl({ h: hue, s: [10, 30], l: [5, 15] });
 
   const sideSize = 5000 / 12;
-  const numberOfLines = randomInt(50, 100);
-  const sideAngle = randomInt(20, 30);
+  const numberOfLines = 40;
+  const sideAngle = 30;
 
   let startPoint = {
     x: viewBoxWidth / 2,
