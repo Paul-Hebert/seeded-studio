@@ -25,7 +25,7 @@ const framedHeight = viewBoxHeight - (margin + frameSize);
 
 const gridSize = 25;
 const gridWidth = framedWidth / gridSize;
-const gridHeight = framedHeight / gridSize - 1;
+const gridHeight = framedHeight / gridSize;
 
 export const handler = buildFunctionEndpoint(() => {
   const gridContents = [];
@@ -97,9 +97,8 @@ export const handler = buildFunctionEndpoint(() => {
 
   const lines = [];
 
-  for (let i = 0; i < randomInt(10, 100); i++) {
-    const x = randomInt(0, gridWidth - 1);
-    const y = randomInt(0, gridHeight - 1);
+  for (let x = 0; x < gridWidth - 1; x += randomInt(5, 30)) {
+    const y = gridHeight - 2;
 
     if (isPositionOpen({ x, y }, gridContents)) {
       gridContents[x][y] = true;
@@ -118,71 +117,122 @@ export const handler = buildFunctionEndpoint(() => {
 
   let emptyPoints = getEmptyPoints(gridContents);
 
-  while (emptyPoints.length) {
+  // while (emptyPoints.length) {
+  for (let z = 0; z < 11; z++) {
     const openLines = lines.filter((line) => !line.isClosed);
 
-    if (openLines.length < 10) {
-      const { x, y } = randomItemInArray(emptyPoints);
-      gridContents[x][y] = true;
+    // if (openLines.length < 10) {
+    //   const { x, y } = randomItemInArray(emptyPoints);
+    //   gridContents[x][y] = true;
 
-      lines.push({
-        isClosed: false,
-        points: [
-          {
-            x,
-            y,
-          },
-        ],
-      });
-    }
+    //   lines.push({
+    //     isClosed: false,
+    //     points: [
+    //       {
+    //         x,
+    //         y,
+    //       },
+    //     ],
+    //   });
+    // }
     openLines.forEach((line) => {
       const { x, y } = line.points.at(-1);
 
-      const nextPositions = [];
+      const nextPositions = [
+        // top left
+        {
+          x: x - 1,
+          y: y - 1,
+        },
+        // top
+        {
+          x,
+          y: y - 1,
+        },
+        // top
+        {
+          x,
+          y: y - 1,
+        },
+        // top
+        {
+          x,
+          y: y - 1,
+        },
+        // top
+        {
+          x,
+          y: y - 1,
+        },
+        // top
+        {
+          x,
+          y: y - 1,
+        },
+        // top
+        {
+          x,
+          y: y - 1,
+        },
+        // top
+        {
+          x,
+          y: y - 1,
+        },
+        // top right
+        {
+          x: x + 1,
+          y: y - 1,
+        },
+        // left
+        // {
+        //   x: x - 1,
+        //   y,
+        // },
+        // // right
+        // {
+        //   x: x + 1,
+        //   y,
+        // },
+        // bottom left
+        // {
+        //   x: x + 1,
+        //   y: y - 1,
+        // },
+        // // bottom
+        // {
+        //   x,
+        //   y: y + 1,
+        // },
+        // // bottom right
+        // {
+        //   x: x + 1,
+        //   y: y + 1,
+        // },
+      ].filter((pos) => isPositionOpen(pos, gridContents));
 
-      const above = {
-        x,
-        y: y - 1,
-      };
-      const below = {
-        x,
-        y: y + 1,
-      };
-      const left = {
-        x: x - 1,
-        y,
-      };
-      const right = {
-        x: x + 1,
-        y,
-      };
-
-      if (isPositionOpen(above, gridContents)) {
-        nextPositions.push(above);
-      }
-      if (isPositionOpen(below, gridContents)) {
-        nextPositions.push(below);
-      }
-      if (isPositionOpen(left, gridContents)) {
-        nextPositions.push(left);
-      }
-      if (isPositionOpen(right, gridContents)) {
-        nextPositions.push(right);
-      }
-
-      if (nextPositions.length === 0) {
+      if (
+        nextPositions.length === 0 ||
+        (line.points.length > 3 && randomChance(0.25))
+      ) {
         line.isClosed = true;
       } else {
-        // if (randomChance(0.25)) {
-        //   lines.push({
-        //     isClosed: false,
-        //     points: [...line.points],
-        //   });
-        // }
-
-        const nextPoint = randomItemInArray(nextPositions);
-        gridContents[nextPoint.x][nextPoint.y] = true;
-        line.points.push(nextPoint);
+        nextPositions.forEach((position, i) => {
+          if (randomChance(0.5)) {
+            gridContents[position.x][position.y] = true;
+            if (randomChance(0.8)) {
+              if (i === nextPositions.length - 1) {
+                line.points.push(position);
+              } else {
+                lines.push({
+                  isBranch: true,
+                  isClosed: false,
+                  points: [line.points.at(-1), position],
+                });
+              }
+            }
+          }
+        });
       }
     });
     emptyPoints = getEmptyPoints(gridContents);
@@ -205,7 +255,8 @@ export const handler = buildFunctionEndpoint(() => {
     `);
 
     if (points.length > 1) {
-      startCircles.push(`
+      if (!line.isBranch) {
+        startCircles.push(`
         <circle
           cx="${points[0].x}"
           cy="${points[0].y}"
@@ -215,6 +266,8 @@ export const handler = buildFunctionEndpoint(() => {
           fill="#fff"
         />
       `);
+      }
+      // if (randomChance(0.75)) {
       endCircles.push(`
         <circle
           cx="${points.at(-1).x}"
@@ -225,6 +278,7 @@ export const handler = buildFunctionEndpoint(() => {
           fill="#fff"
         />
       `);
+      // }
     } else {
       const newSpiralPoints = spiralPoints({
         x: points[0].x,
@@ -235,22 +289,22 @@ export const handler = buildFunctionEndpoint(() => {
         deltaMod: 100,
         angleChange: 50,
       });
-      soloCircles.push(`
-        <path
-          d="${spline(newSpiralPoints)}"
-          fill="none"
-          stroke-width="4"
-          stroke="${soloColor1}"
-        />
-        <circle
-          cx="${points[0].x}"
-          cy="${points[0].y}"
-          stroke="${soloColor1}"
-          stroke-width="4"
-          r="8"
-          fill="none"
-        />
-      `);
+      // soloCircles.push(`
+      //   <path
+      //     d="${spline(newSpiralPoints)}"
+      //     fill="none"
+      //     stroke-width="4"
+      //     stroke="${soloColor1}"
+      //   />
+      //   <circle
+      //     cx="${points[0].x}"
+      //     cy="${points[0].y}"
+      //     stroke="${soloColor1}"
+      //     stroke-width="4"
+      //     r="8"
+      //     fill="none"
+      //   />
+      // `);
 
       // endCircles.push();
       // endCircles.push(`

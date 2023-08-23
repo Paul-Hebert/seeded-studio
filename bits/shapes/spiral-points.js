@@ -1,10 +1,17 @@
 import { randomDegree } from "randomness-helpers";
 import { angledPositionFromPoint } from "../../helpers/angled-position-from-point.js";
 
-export function spiralPoints({ x, y, r, angle = randomDegree() }) {
+export function spiralPoints({
+  x,
+  y,
+  r,
+  angle = randomDegree(),
+  angleChange = 30,
+  deltaMod = 50,
+}) {
   const points = [];
 
-  const delta = r / 50;
+  const delta = r / deltaMod;
 
   let distance = 0;
 
@@ -17,7 +24,7 @@ export function spiralPoints({ x, y, r, angle = randomDegree() }) {
     points.push(newPoint);
 
     distance += delta;
-    angle += 30;
+    angle += angleChange;
   }
 
   return points;

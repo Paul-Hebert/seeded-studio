@@ -25,7 +25,7 @@ const framedHeight = viewBoxHeight - (margin + frameSize);
 
 const gridSize = 25;
 const gridWidth = framedWidth / gridSize;
-const gridHeight = framedHeight / gridSize - 1;
+const gridHeight = framedHeight / gridSize;
 
 export const handler = buildFunctionEndpoint(() => {
   const gridContents = [];
@@ -138,37 +138,48 @@ export const handler = buildFunctionEndpoint(() => {
     openLines.forEach((line) => {
       const { x, y } = line.points.at(-1);
 
-      const nextPositions = [];
-
-      const above = {
-        x,
-        y: y - 1,
-      };
-      const below = {
-        x,
-        y: y + 1,
-      };
-      const left = {
-        x: x - 1,
-        y,
-      };
-      const right = {
-        x: x + 1,
-        y,
-      };
-
-      if (isPositionOpen(above, gridContents)) {
-        nextPositions.push(above);
-      }
-      if (isPositionOpen(below, gridContents)) {
-        nextPositions.push(below);
-      }
-      if (isPositionOpen(left, gridContents)) {
-        nextPositions.push(left);
-      }
-      if (isPositionOpen(right, gridContents)) {
-        nextPositions.push(right);
-      }
+      const nextPositions = [
+        // top left
+        {
+          x: x - 1,
+          y: y - 1,
+        },
+        // top
+        {
+          x,
+          y: y - 1,
+        },
+        // top right
+        {
+          x: x + 1,
+          y: y - 1,
+        },
+        // left
+        {
+          x: x - 1,
+          y,
+        },
+        // right
+        {
+          x: x + 1,
+          y,
+        },
+        // bottom left
+        {
+          x: x + 1,
+          y: y - 1,
+        },
+        // bottom
+        {
+          x,
+          y: y + 1,
+        },
+        // bottom right
+        {
+          x: x + 1,
+          y: y + 1,
+        },
+      ].filter((pos) => isPositionOpen(pos, gridContents));
 
       if (nextPositions.length === 0) {
         line.isClosed = true;
@@ -229,7 +240,7 @@ export const handler = buildFunctionEndpoint(() => {
       const newSpiralPoints = spiralPoints({
         x: points[0].x,
         y: points[0].y,
-        r: 9,
+        r: 8,
         // deltaMod: 100,
         // angleChange: 90,
         deltaMod: 100,
@@ -247,7 +258,7 @@ export const handler = buildFunctionEndpoint(() => {
           cy="${points[0].y}"
           stroke="${soloColor1}"
           stroke-width="4"
-          r="8"
+          r="6"
           fill="none"
         />
       `);

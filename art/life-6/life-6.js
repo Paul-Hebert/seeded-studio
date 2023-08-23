@@ -10,6 +10,7 @@ import {
 import { spline } from "@georgedoescode/spline";
 import { spiralPoints } from "../../bits/shapes/spiral-points.js";
 import { inkscapeLayer } from "../../helpers/inkscape-layer.js";
+import FastNoise from "fastnoise-lite";
 
 const viewBoxWidth = 1100;
 const viewBoxHeight = 850;
@@ -25,9 +26,25 @@ const framedHeight = viewBoxHeight - (margin + frameSize);
 
 const gridSize = 25;
 const gridWidth = framedWidth / gridSize;
-const gridHeight = framedHeight / gridSize - 1;
+const gridHeight = framedHeight / gridSize;
 
-export const handler = buildFunctionEndpoint(() => {
+export const handler = buildFunctionEndpoint((seed) => {
+  const noise = new FastNoise();
+  noise.SetNoiseType(
+    FastNoise.NoiseType[
+      randomItemInArray([
+        "OpenSimplex2",
+        "OpenSimplex2S",
+        "Cellular",
+        "Perlin",
+        // "ValueCubic",
+        // "Value",
+      ])
+    ]
+  );
+  noise.SetSeed(seed);
+  noise.SetFrequency(0.01);
+
   const gridContents = [];
   for (let x = 0; x < gridWidth - 1; x++) {
     let column = [];
@@ -138,53 +155,173 @@ export const handler = buildFunctionEndpoint(() => {
     openLines.forEach((line) => {
       const { x, y } = line.points.at(-1);
 
-      const nextPositions = [];
+      const localNoise = noise.GetNoise(x * 30, y * 30);
 
-      const above = {
-        x,
-        y: y - 1,
-      };
-      const below = {
-        x,
-        y: y + 1,
-      };
-      const left = {
-        x: x - 1,
-        y,
-      };
-      const right = {
-        x: x + 1,
-        y,
-      };
+      if (localNoise < -0.33) {
+        const nextPositions = [];
 
-      if (isPositionOpen(above, gridContents)) {
-        nextPositions.push(above);
-      }
-      if (isPositionOpen(below, gridContents)) {
-        nextPositions.push(below);
-      }
-      if (isPositionOpen(left, gridContents)) {
-        nextPositions.push(left);
-      }
-      if (isPositionOpen(right, gridContents)) {
-        nextPositions.push(right);
-      }
+        const above = {
+          x,
+          y: y - 1,
+        };
+        const below = {
+          x,
+          y: y + 1,
+        };
+        const left = {
+          x: x - 1,
+          y,
+        };
+        const right = {
+          x: x + 1,
+          y,
+        };
 
-      if (nextPositions.length === 0) {
-        line.isClosed = true;
+        if (isPositionOpen(above, gridContents)) {
+          nextPositions.push(above);
+        }
+        if (isPositionOpen(below, gridContents)) {
+          nextPositions.push(below);
+        }
+        if (isPositionOpen(left, gridContents)) {
+          nextPositions.push(left);
+        }
+        if (isPositionOpen(right, gridContents)) {
+          nextPositions.push(right);
+        }
+
+        if (nextPositions.length === 0) {
+          line.isClosed = true;
+        } else {
+          // if (randomChance(0.25)) {
+          //   lines.push({
+          //     isClosed: false,
+          //     points: [...line.points],
+          //   });
+          // }
+
+          const nextPoint = randomItemInArray(nextPositions);
+          gridContents[nextPoint.x][nextPoint.y] = true;
+          line.points.push(nextPoint);
+        }
+      } else if (localNoise < 0.33) {
+        const nextPositions = [
+          // top left
+          {
+            x: x - 1,
+            y: y - 1,
+          },
+          // top
+          {
+            x,
+            y: y - 1,
+          },
+          // top right
+          {
+            x: x + 1,
+            y: y - 1,
+          },
+          // left
+          {
+            x: x - 1,
+            y,
+          },
+          // right
+          {
+            x: x + 1,
+            y,
+          },
+          // bottom left
+          {
+            x: x + 1,
+            y: y - 1,
+          },
+          // bottom
+          {
+            x,
+            y: y + 1,
+          },
+          // bottom right
+          {
+            x: x + 1,
+            y: y + 1,
+          },
+        ].filter((pos) => isPositionOpen(pos, gridContents));
+
+        if (nextPositions.length === 0) {
+          line.isClosed = true;
+        } else {
+          const nextPoint = randomItemInArray(nextPositions);
+          gridContents[nextPoint.x][nextPoint.y] = true;
+          line.points.push(nextPoint);
+        }
       } else {
-        // if (randomChance(0.25)) {
-        //   lines.push({
-        //     isClosed: false,
-        //     points: [...line.points],
-        //   });
-        // }
+        const nextPositions = [
+          // top left
+          {
+            x: x - 1,
+            y: y - 1,
+          },
+          // top
+          {
+            x,
+            y: y - 1,
+          },
+          // top right
+          {
+            x: x + 1,
+            y: y - 1,
+          },
+          // left
+          {
+            x: x - 1,
+            y,
+          },
+          // right
+          {
+            x: x + 1,
+            y,
+          },
+          // bottom left
+          {
+            x: x + 1,
+            y: y - 1,
+          },
+          // bottom
+          {
+            x,
+            y: y + 1,
+          },
+          // bottom right
+          {
+            x: x + 1,
+            y: y + 1,
+          },
+        ].filter((pos) => isPositionOpen(pos, gridContents));
 
-        const nextPoint = randomItemInArray(nextPositions);
-        gridContents[nextPoint.x][nextPoint.y] = true;
-        line.points.push(nextPoint);
+        if (nextPositions.length === 0 || randomChance(0.25)) {
+          line.isClosed = true;
+        } else {
+          nextPositions.forEach((position, i) => {
+            if (randomChance(0.5)) {
+              gridContents[position.x][position.y] = true;
+              // if (randomChance(0.8)) {
+              if (i === nextPositions.length - 1 || nextPositions.length < 4) {
+                line.points.push(position);
+              } else {
+                lines.push({
+                  isBranch: true,
+                  isClosed: false,
+                  points: [line.points.at(-1), position],
+                });
+              }
+              // }
+            }
+          });
+        }
       }
     });
+
     emptyPoints = getEmptyPoints(gridContents);
   }
 
@@ -229,7 +366,7 @@ export const handler = buildFunctionEndpoint(() => {
       const newSpiralPoints = spiralPoints({
         x: points[0].x,
         y: points[0].y,
-        r: 9,
+        r: 8,
         // deltaMod: 100,
         // angleChange: 90,
         deltaMod: 100,
@@ -247,7 +384,7 @@ export const handler = buildFunctionEndpoint(() => {
           cy="${points[0].y}"
           stroke="${soloColor1}"
           stroke-width="4"
-          r="8"
+          r="6"
           fill="none"
         />
       `);
