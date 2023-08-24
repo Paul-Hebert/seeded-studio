@@ -8,15 +8,12 @@ import {
   randomHue,
 } from "randomness-helpers";
 import { spline } from "@georgedoescode/spline";
-import { spiralPoints } from "../../bits/shapes/spiral-points.js";
 import { inkscapeLayer } from "../../helpers/inkscape-layer.js";
 
-const viewBoxWidth = 1100;
-const viewBoxHeight = 850;
-// const viewBoxWidth = 1000;
-// const viewBoxHeight = 1000;
+const viewBoxWidth = 1600;
+const viewBoxHeight = 900;
 
-const margin = 25;
+const margin = 0;
 
 const frameSize = 25;
 
@@ -25,77 +22,171 @@ const framedHeight = viewBoxHeight - (margin + frameSize);
 
 const gridSize = 25;
 const gridWidth = framedWidth / gridSize;
-const gridHeight = framedHeight / gridSize - 1;
+const gridHeight = framedHeight / gridSize;
 
 export const handler = buildFunctionEndpoint(() => {
   const gridContents = [];
-  for (let x = 0; x < gridWidth - 1; x++) {
+  for (let x = 0; x < gridWidth; x++) {
     let column = [];
-    for (let y = 0; y < gridHeight - 1; y++) {
+    for (let y = 0; y < gridHeight; y++) {
       column.push(false);
     }
     gridContents.push(column);
   }
 
-  const h = randomHue();
-  const strokeColor = randomHsl({ h, l: 20 });
-  const soloColor1 = randomHsl({ h: h - 120, l: 50 });
-  const soloColor2 = randomHsl({ h: h + 120, l: 50 });
+  const strokeColor = "#158466";
+  const soloColor1 = "#8abfff";
+  const fileColor = "#183889";
+  const fileInnerColor = "#0e1c43";
+  const skeletonColor = "#55476b";
 
-  const frame = `
-    <rect
-      width="${framedWidth}" 
-      height="${framedHeight}"
-      x="${margin}"
-      y="${margin}"
-      stroke="${strokeColor}"
-      stroke-width="4"
-      fill="none"
-    />
-  `;
+  const fileBlocks = [
+    { x: 4, y: 13, width: 9, height: 20, name: "button.tsx" },
+    { x: 19, y: 15, width: 9, height: 15, name: "button.scss" },
+    { x: 34, y: 12, width: 9, height: 12, name: "button.test.ts" },
+    { x: 49, y: 14, width: 9, height: 18, name: "button.stories.mdx" },
+  ];
 
-  const wonkyCircles = [];
+  const terminalBlock = { x: 17, y: 5, width: 29, height: 4 };
 
-  // for (let i = 0; i < randomInt(1, 5); i++) {
-  //   const topSide = randomInt(2, gridHeight - 3);
-  //   const leftSide = randomInt(2, gridHeight - 3);
+  const blockRects = [];
 
-  //   const size = 2; //randomInt(2, 4);
+  [...fileBlocks, terminalBlock].forEach((block) => {
+    const rectPos = gridPosition(block);
+    blockRects.push(`
+      <rect 
+        x="${rectPos.x}"
+        y="${rectPos.y}"
+        width="${(block.width - 1) * gridSize}"
+        height="${(block.height - 1) * gridSize}"
+        fill="${fileColor}"
+        rx="12"
+      />
+    `);
+    for (let left = block.x; left < block.x + block.width; left++) {
+      for (let top = block.y; top < block.y + block.height; top++) {
+        gridContents[left][top] = true;
+      }
+    }
+  });
 
-  //   for (let left = 0; left < size; left++) {
-  //     for (let top = 0; top < size; top++) {
-  //       gridContents[leftSide + left][topSide + top] = "wonky";
-  //     }
-  //   }
+  const terminalTextPos = gridPosition({
+    x: terminalBlock.x,
+    y: terminalBlock.y + 1.95,
+  });
+  blockRects.push(`
+        <text 
+          fill="#fff" 
+          stroke="none"
+          x="${viewBoxWidth / 2}"
+          y="${terminalTextPos.y}"
+          dominant-baseline="center"
+          text-anchor="middle"
+          style="
+            font-family: Source Code Pro;
+            font-size: 2.5rem;
+          "
 
-  //   const { x, y } = gridPosition({
-  //     x: leftSide + size / 4,
-  //     y: topSide + size / 4,
-  //   });
-
-  //   wonkyCircles.push(`
-  //     <path
-  //       d="${spline(
-  //         wonkyCirclePoints({ cx: x, cy: y, r: ((gridSize - 5) * size) / 2 }),
-  //         1,
-  //         true
-  //       )}"
-  //       stroke="${soloColor2}"
-  //       fill="none"
-  //       stroke-width="4"
-  //     />
-  //     <circle
-  //       cx="${x}"
-  //       cy="${y}"
-  //       r="2"
-  //       stroke="${soloColor2}"
-  //       fill="none"
-  //       stroke-width="4"
-  //     />
-  //   `);
-  // }
+        >
+          $ npm run generate-component
+        </text>
+      `);
 
   const lines = [];
+
+  fileBlocks.forEach((block) => {
+    const textPos = gridPosition({
+      x: block.x + 1,
+      y: block.y + 1,
+    });
+    blockRects.push(`
+        <text 
+          fill="#fff" 
+          stroke="none"
+          x="${textPos.x}"
+          y="${textPos.y}"
+          dominant-baseline="middle"
+          style="
+            font-family: Source Sans Code;
+            font-size: 1.35rem;
+          "
+
+        >
+          ${block.name}
+        </text>
+      `);
+
+    const innerRectPos = gridPosition({
+      x: block.x,
+      y: block.y + 2,
+    });
+
+    blockRects.push(`
+      <rect 
+        x="${innerRectPos.x}"
+        y="${innerRectPos.y}"
+        width="${(block.width - 1) * gridSize}"
+        height="${(block.height - 3) * gridSize}"
+        fill="${fileInnerColor}"
+        rx="12"
+      />
+      <rect 
+        x="${innerRectPos.x}"
+        y="${innerRectPos.y}"
+        width="${(block.width - 1) * gridSize}"
+        height="${1 * gridSize}"
+        fill="${fileInnerColor}"
+      />
+    `);
+
+    for (let y = block.y + 3; y < block.y + block.height - 1; y++) {
+      const startPoint = gridPosition({ x: block.x + 1, y: y - 0.25 });
+      blockRects.push(`
+        <rect 
+          x="${startPoint.x}"
+          y="${startPoint.y}"
+          width="${gridSize * randomInt(3, block.width - 3)}"
+          height="${gridSize / 2}"
+          fill="${skeletonColor}"
+          rx="6"
+        />
+      `);
+    }
+
+    // Connecting line
+    const newLine = {
+      isSpecialLine: true,
+      isClosed: true,
+      points: [],
+    };
+
+    let pos = {
+      y: block.y + block.height - 5,
+      x: block.x + Math.round(block.width / 2) - 1,
+    };
+
+    while (pos.y > terminalBlock.y + terminalBlock.height + 1) {
+      gridContents[pos.x][pos.y] = true;
+      newLine.points.push({ ...pos });
+      pos.y--;
+    }
+
+    const xTarget = terminalBlock.x + Math.round(terminalBlock.width / 2);
+
+    while (pos.x !== xTarget) {
+      gridContents[pos.x][pos.y] = true;
+      newLine.points.push({ ...pos });
+      pos.x += pos.x > xTarget ? -1 : 1;
+    }
+
+    while (pos.y > terminalBlock.y + terminalBlock.height / 2 - 1) {
+      gridContents[pos.x][pos.y] = true;
+      newLine.points.push({ ...pos });
+      pos.y--;
+    }
+
+    lines.push(newLine);
+  });
 
   for (let i = 0; i < randomInt(10, 100); i++) {
     const x = randomInt(0, gridWidth - 1);
@@ -198,8 +289,8 @@ export const handler = buildFunctionEndpoint(() => {
     paths.push(`
       <path
         d="${spline(points)}"
-        stroke="${strokeColor}"
-        stroke-width="4"
+        stroke="${line.isSpecialLine ? fileColor : strokeColor}"
+        stroke-width="${line.isSpecialLine ? 8 : 4}"
         fill="none"
       />
     `);
@@ -226,43 +317,16 @@ export const handler = buildFunctionEndpoint(() => {
         />
       `);
     } else {
-      const newSpiralPoints = spiralPoints({
-        x: points[0].x,
-        y: points[0].y,
-        r: 9,
-        // deltaMod: 100,
-        // angleChange: 90,
-        deltaMod: 100,
-        angleChange: 50,
-      });
       soloCircles.push(`
-        <path
-          d="${spline(newSpiralPoints)}"
-          fill="none"
-          stroke-width="4"
-          stroke="${soloColor1}"
-        />
         <circle
           cx="${points[0].x}"
           cy="${points[0].y}"
           stroke="${soloColor1}"
           stroke-width="4"
           r="8"
-          fill="none"
+          fill="${soloColor1}"
         />
       `);
-
-      // endCircles.push();
-      // endCircles.push(`
-      //   <circle
-      //     cx="${points.at(-1).x}"
-      //     cy="${points.at(-1).y}"
-      //     stroke="${strokeColor}"
-      //     stroke-width="4"
-      //     r="2"
-      //     fill="#fff"
-      //   />
-      // `);
     }
   });
 
@@ -276,7 +340,7 @@ export const handler = buildFunctionEndpoint(() => {
         paths.join("") +
           startCircles.join("") +
           endCircles.join("") +
-          wonkyCircles.join("")
+          blockRects.join("")
       ) + inkscapeLayer("1 - solo circles", soloCircles.join("")),
   });
 });
