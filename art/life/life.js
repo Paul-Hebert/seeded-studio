@@ -41,13 +41,13 @@ export const handler = buildFunctionEndpoint(() => {
   const skeletonColor = "#55476b";
 
   const fileBlocks = [
-    { x: 4, y: 13, width: 9, height: 20, name: "button.tsx" },
-    { x: 19, y: 15, width: 9, height: 15, name: "button.scss" },
-    { x: 34, y: 12, width: 9, height: 12, name: "button.test.ts" },
-    { x: 49, y: 14, width: 9, height: 18, name: "button.stories.mdx" },
+    { x: 4, y: 5, width: 9, height: 20, name: "button.tsx" },
+    { x: 19, y: 7, width: 9, height: 15, name: "button.scss" },
+    { x: 34, y: 4, width: 9, height: 12, name: "button.test.ts" },
+    { x: 49, y: 6, width: 9, height: 18, name: "button.stories.mdx" },
   ];
 
-  const terminalBlock = { x: 17, y: 5, width: 29, height: 4 };
+  const terminalBlock = { x: 17, y: 25, width: 29, height: 4 };
 
   const blockRects = [];
 
@@ -165,10 +165,10 @@ export const handler = buildFunctionEndpoint(() => {
       x: block.x + Math.round(block.width / 2) - 1,
     };
 
-    while (pos.y > terminalBlock.y + terminalBlock.height + 1) {
+    while (pos.y < terminalBlock.y + terminalBlock.height / 2 - 1) {
       gridContents[pos.x][pos.y] = true;
       newLine.points.push({ ...pos });
-      pos.y--;
+      pos.y++;
     }
 
     const xTarget = terminalBlock.x + Math.round(terminalBlock.width / 2);
@@ -177,12 +177,6 @@ export const handler = buildFunctionEndpoint(() => {
       gridContents[pos.x][pos.y] = true;
       newLine.points.push({ ...pos });
       pos.x += pos.x > xTarget ? -1 : 1;
-    }
-
-    while (pos.y > terminalBlock.y + terminalBlock.height / 2 - 1) {
-      gridContents[pos.x][pos.y] = true;
-      newLine.points.push({ ...pos });
-      pos.y--;
     }
 
     lines.push(newLine);
