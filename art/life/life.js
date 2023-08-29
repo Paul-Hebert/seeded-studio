@@ -9,6 +9,7 @@ import {
 } from "randomness-helpers";
 import { spline } from "@georgedoescode/spline";
 import { inkscapeLayer } from "../../helpers/inkscape-layer.js";
+import { zigZag } from "../../bits/shapes/zig-zag.js";
 
 const viewBoxWidth = 1600;
 const viewBoxHeight = 900;
@@ -34,17 +35,17 @@ export const handler = buildFunctionEndpoint(() => {
     gridContents.push(column);
   }
 
-  const strokeColor = "#158466";
-  const soloColor1 = "#8abfff";
+  const strokeColor = "#c0cfd8";
+  const soloColor1 = "#e2bfb5";
   const fileColor = "#183889";
   const fileInnerColor = "#0e1c43";
-  const skeletonColor = "#55476b";
+  const skeletonColor = "#003263";
 
   const fileBlocks = [
-    { x: 4, y: 5, width: 9, height: 20, name: "button.tsx" },
-    { x: 19, y: 7, width: 9, height: 15, name: "button.scss" },
-    { x: 34, y: 4, width: 9, height: 12, name: "button.test.ts" },
-    { x: 49, y: 6, width: 9, height: 18, name: "button.stories.mdx" },
+    { x: 4, y: 5, width: 11, height: 20, name: "button.tsx" },
+    { x: 19, y: 7, width: 11, height: 15, name: "button.scss" },
+    { x: 33, y: 4, width: 11, height: 12, name: "button.test.ts" },
+    { x: 48, y: 6, width: 11, height: 18, name: "button.stories.mdx" },
   ];
 
   const terminalBlock = { x: 17, y: 25, width: 29, height: 4 };
@@ -96,7 +97,7 @@ export const handler = buildFunctionEndpoint(() => {
 
   fileBlocks.forEach((block) => {
     const textPos = gridPosition({
-      x: block.x + 1,
+      x: block.x + 0.75,
       y: block.y + 1,
     });
     blockRects.push(`
@@ -140,7 +141,7 @@ export const handler = buildFunctionEndpoint(() => {
     `);
 
     for (let y = block.y + 3; y < block.y + block.height - 1; y++) {
-      const startPoint = gridPosition({ x: block.x + 1, y: y - 0.25 });
+      const startPoint = gridPosition({ x: block.x + 0.75, y: y - 0.25 });
       blockRects.push(`
         <rect 
           x="${startPoint.x}"
@@ -282,7 +283,7 @@ export const handler = buildFunctionEndpoint(() => {
     const points = line.points.map(gridPosition);
     paths.push(`
       <path
-        d="${spline(points)}"
+        d="${line.isSpecialLine ? zigZag(points) : spline(points)}"
         stroke="${line.isSpecialLine ? fileColor : strokeColor}"
         stroke-width="${line.isSpecialLine ? 8 : 4}"
         fill="none"
@@ -315,9 +316,7 @@ export const handler = buildFunctionEndpoint(() => {
         <circle
           cx="${points[0].x}"
           cy="${points[0].y}"
-          stroke="${soloColor1}"
-          stroke-width="4"
-          r="8"
+          r="6"
           fill="${soloColor1}"
         />
       `);
