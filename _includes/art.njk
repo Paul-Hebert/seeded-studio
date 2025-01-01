@@ -10,11 +10,13 @@
   <body>
     <h1>{{title}}</h1>
 
-    {% for i in range(1, 51) %}
-      <img 
-        src="{{data.functions_host}}/.netlify/functions/{{ name }}/{{ i }}" 
-        alt="An artwork procedurally generated using the algorithm {{ title }} and the seed {{ i }}."
-      />
-    {% endfor %}
+    <div>
+      {% for i in range(1, 51) %}
+        <img 
+          src="{{data.functions_host}}/.netlify/functions/{{ name }}/{{ i }}" 
+          alt="An artwork procedurally generated using the algorithm {{ title }} and the seed {{ i }}."
+        />
+      {% endfor %}
+    </div>
   </body>
 </html>

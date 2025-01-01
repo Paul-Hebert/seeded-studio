@@ -21,7 +21,9 @@ async function generate() {
     },
   ]);
 
-  const { slug, title, description } = responses;
+  let { slug, title, description } = responses;
+
+  slug = slug.trim();
 
   mkdirSync(`./art/${slug}`);
 

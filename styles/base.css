@@ -5,8 +5,13 @@ html {
 svg,
 img {
   background-color: #fff;
-  max-width: 90vw;
   max-height: 90vh;
-  width: 50%;
-  float: left;
+  width: 31%;
+  margin: 1%;
+  box-sizing: border-box;
+
+  &:first-child {
+    width: 100%;
+    margin: 0;
+  }
 }
