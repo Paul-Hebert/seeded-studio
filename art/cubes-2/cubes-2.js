@@ -290,8 +290,6 @@ function buildTopLine({
       distance: (pointCount + 1) * spaceBetweenLines,
     });
 
-    console.log((pointCount + 1) * spaceBetweenLines);
-
     const mod = reversed
       ? grid[pointCount][depth - 1]
       : grid[depth - 1][pointCount];

@@ -2,6 +2,11 @@ html {
   background-color: #eee;
 }
 
-svg {
+svg,
+img {
   background-color: #fff;
+  max-width: 90vw;
+  max-height: 90vh;
+  width: 50%;
+  float: left;
 }
