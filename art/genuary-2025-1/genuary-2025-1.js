@@ -46,11 +46,26 @@ export const handler = buildFunctionEndpoint((seed) => {
     y += randomInt(...lineSpacing);
   }
 
+  const hue = random(0, 360);
+
   function drawVerticalLines(lines) {
     const svgLines = [];
     const lineWidth = xSpacing;
 
     for (let lineCount = 0; lineCount < lines.length; lineCount++) {
+      const saturation = 100 - lineCount * 10;
+      const lightness = 100 - 100 * ((lineCount + 1) / lines.length);
+
+      const topColor = `hsl(${hue}deg, ${saturation}%, ${lightness}%)`;
+      const bottomColor = `hsla(${hue}deg, ${saturation / 2}%, 100%, 0%)`;
+
+      svgLines.push(`
+        <linearGradient id="gradient-${lineCount}" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="${topColor}" />
+          <stop offset="100%" stop-color="${bottomColor}" />
+        </linearGradient>
+      `);
+
       for (let x = 0; x < scaledWidth; x++) {
         const y = lines[lineCount][x];
         const y2 = lines[lineCount + 1]
@@ -66,7 +81,7 @@ export const handler = buildFunctionEndpoint((seed) => {
             stroke="white"
             stroke-width="${lineWidth / 2}"
             rx="${lineWidth / 2}"
-            fill="url(#gradient)"
+            fill="url(#gradient-${lineCount})"
           >
           </rect>`
         );
@@ -75,19 +90,8 @@ export const handler = buildFunctionEndpoint((seed) => {
     return svgLines.join("");
   }
 
-  const hue = randomInt(0, 360);
-  const topColor = `hsl(${hue}deg, 100%, 30%)`;
-  const bottomColor = `hsla(${hue}deg, 50%, 100%, 0%)`;
-
   return buildSvg({
-    content: `
-      <linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
-        <stop offset="0%" stop-color="${topColor}" />
-        <stop offset="100%" stop-color="${bottomColor}" />
-      </linearGradient>
-
-      ${drawVerticalLines(squigglyLines)}
-    `,
+    content: drawVerticalLines(squigglyLines),
     viewBoxHeight: height,
     viewBoxWidth: width,
   });
